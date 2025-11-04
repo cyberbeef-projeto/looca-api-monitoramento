@@ -29,7 +29,7 @@ public class RedeService {
             return;
         }
 
-        System.out.println("✅ Monitorando rede para Máquina ID " + idMaquina + " | Componente ID " + idComponente);
+        System.out.println("Monitorando rede para Máquina ID " + idMaquina + " | Componente ID " + idComponente);
 
         while (true) {
             Long bytesRecebidosAntes = getBytesRecebidos(interfaces);

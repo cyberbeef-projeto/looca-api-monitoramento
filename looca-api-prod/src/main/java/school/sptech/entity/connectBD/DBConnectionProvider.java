@@ -15,7 +15,7 @@ public class DBConnectionProvider {
         String ip = dotenv.get("IP_BANCO");
         String user = dotenv.get("USUARIO");
         String password = dotenv.get("PASSWORD");
-        basicDataSource.setUrl("jdbc:mysql://" + ip + ":3306/cyberbeef?useSSL=false&serverTimezone=UTC");
+        basicDataSource.setUrl("jdbc:mysql://" + ip + ":3307/cyberbeef?useSSL=false&serverTimezone=UTC");
         basicDataSource.setUsername(user);  // seu usuário do MySQL
         basicDataSource.setPassword(password);  // sua senha do MySQL
         basicDataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");

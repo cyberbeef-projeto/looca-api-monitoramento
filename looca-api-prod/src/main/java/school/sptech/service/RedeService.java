@@ -2,17 +2,20 @@ package school.sptech.service;
 
 import com.github.britooo.looca.api.core.Looca;
 import com.github.britooo.looca.api.group.rede.RedeInterface;
-import school.sptech.dto.RedeDTO;
 import school.sptech.repository.RedeRepository;
+import school.sptech.repository.SlackRepository;
+import school.sptech.dto.RedeDTO;
 
 import java.util.List;
 
 public class RedeService {
 
     private final RedeRepository repository;
+    private final SlackService slackService;
 
-    public RedeService(RedeRepository repository) {
+    public RedeService(RedeRepository repository, SlackService slackService) {
         this.repository = repository;
+        this.slackService = slackService;
     }
 
     public void monitorarRede() throws InterruptedException {
@@ -25,7 +28,6 @@ public class RedeService {
         // Se não existir componente 'REDE' cadastrado, interrompe
         if (idComponente == null) {
             System.err.println("Nenhum componente do tipo 'REDE' encontrado para a máquina ID " + idMaquina);
-            System.err.println("Cadastre um componente com tipoComponente = 'REDE' antes de iniciar o monitoramento.");
             return;
         }
 
@@ -58,6 +60,13 @@ public class RedeService {
 
             // Salva os dados no banco
             repository.salvarDadosRede(idMaquina, idComponente, downloadMbps, uploadMbps, packetLoss);
+
+            // Gera o log e envia para o Slack
+            String tipoLog = packetLoss > 20 ? "ERROR" : packetLoss > 5 ? "WARNING" : "INFO";
+            String mensagemLog = String.format("Máquina ID: %d | Download: %.2f Mbps | Upload: %.2f Mbps | Packet Loss: %.2f%%", idMaquina, downloadMbps, uploadMbps, packetLoss);
+
+            // Salva o log no banco e envia para o Slack
+            slackService.enviarMensagemSlack(idMaquina, tipoLog, mensagemLog);
 
             mostrarPainel(downloadMbps, uploadMbps, packetLoss);
             mostrarLeituras();

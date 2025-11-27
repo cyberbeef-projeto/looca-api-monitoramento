@@ -1,53 +1,65 @@
 package school.sptech.service;
 
-import io.github.cdimascio.dotenv.Dotenv;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
-import org.apache.http.entity.StringEntity;
 import school.sptech.repository.SlackRepository;
+import io.github.cdimascio.dotenv.Dotenv;
 
-import java.io.IOException;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 public class SlackService {
 
+    private final SlackRepository repository;
     private final String webhookUrl;
-    private final SlackRepository slackRepository;
 
-    // Construtor atualizado para aceitar o SlackRepository
     public SlackService(SlackRepository slackRepository) {
         Dotenv dotenv = Dotenv.load();
-        this.webhookUrl = dotenv.get("URL_WEBHOOK");  // Carrega o SLACK_WEBHOOK_URL do .env
-        this.slackRepository = slackRepository;
+        this.webhookUrl = dotenv.get("URL_WEBHOOK");  // precisa ser um webhook válido
+        this.repository = slackRepository;
     }
 
-    // Envia mensagem para o Slack e salva log
-    public void enviarMensagemSlack(Long idMaquina, String tipo, String mensagem) {
-        String texto = String.format("Tipo: %s\nMáquina ID: %d\nMensagem: %s", tipo, idMaquina, mensagem);
+    public void enviarMensagemSlack(Long idMaquina,
+                                    Long idComponente,
+                                    Long idParametro,
+                                    String tipo,
+                                    String mensagemOriginal) {
 
-        // Configura o payload JSON para enviar ao Slack
-        String jsonPayload = "{ \"text\": \"" + texto + "\" }";
+        // MONTA A DESCRIÇÃO formatada como você pediu
+        String descricaoFormatada = tipo + " - " + mensagemOriginal;
 
-        try (CloseableHttpClient client = HttpClients.createDefault()) {
-            HttpPost post = new HttpPost(webhookUrl);
-            StringEntity entity = new StringEntity(jsonPayload);
-            post.setEntity(entity);
-            post.setHeader("Content-type", "application/json");
+        // 1) Salva log SEMPRE
+        repository.salvarLogSlack(idMaquina, tipo, descricaoFormatada);
 
-            // Executa a requisição HTTP
-            try (org.apache.http.client.methods.CloseableHttpResponse response = client.execute(post)) {
-                HttpEntity responseEntity = response.getEntity();
-                String responseString = EntityUtils.toString(responseEntity);
-                System.out.println("Mensagem enviada para o Slack: " + responseString);
+        // 2) Só gera alerta e envia para Slack se ANORMAL ou CRITICO
+        if (tipo.equalsIgnoreCase("ANORMAL") || tipo.equalsIgnoreCase("CRITICO")) {
+
+            // Salvar alerta com a descrição formatada
+            repository.salvarAlerta(idMaquina, idComponente, idParametro, descricaoFormatada);
+
+            // Enviar para Slack
+            enviarParaSlack(descricaoFormatada);
+        }
+    }
+
+    private void enviarParaSlack(String mensagem) {
+        try {
+            URL url = new URL(webhookUrl);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+
+            conn.setRequestMethod("POST");
+            conn.setDoOutput(true);
+            conn.setRequestProperty("Content-Type", "application/json");
+
+            String json = String.format("{\"text\": \"%s\"}", mensagem.replace("\"", "'"));
+
+            try (OutputStream os = conn.getOutputStream()) {
+                os.write(json.getBytes());
             }
 
-            // Registra o log no banco de dados
-            slackRepository.salvarLogSlack(idMaquina, tipo, mensagem);
-
-        } catch (IOException e) {
-            System.err.println("Erro ao enviar mensagem para o Slack: " + e.getMessage());
+            System.out.println("Slack response: " + conn.getResponseCode());
+        }
+        catch (Exception e) {
+            System.err.println("Erro ao enviar mensagem ao Slack: " + e.getMessage());
         }
     }
 }

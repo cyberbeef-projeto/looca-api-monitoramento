@@ -21,6 +21,7 @@ public class SlackService {
     public void enviarMensagemSlack(Long idMaquina,
                                     Long idComponente,
                                     Long idParametro,
+                                    Long idLeitura,
                                     String tipo,
                                     String mensagemOriginal) {
 
@@ -31,7 +32,7 @@ public class SlackService {
 
         if (tipo.equalsIgnoreCase("Anormal") || tipo.equalsIgnoreCase("Critico")) {
 
-            repository.salvarAlerta(idMaquina, idComponente, idParametro, desc);
+            repository.salvarAlerta(idLeitura, idMaquina, idComponente, idParametro, desc);
 
             enviarParaSlack(descricaoFormatada);
         }
@@ -52,7 +53,7 @@ public class SlackService {
                 os.write(json.getBytes());
             }
 
-           System.out.println("Slack response: " + conn.getResponseCode());
+            System.out.println("Slack response: " + conn.getResponseCode());
         }
         catch (Exception e) {
             System.err.println("Erro ao enviar mensagem ao Slack: " + e.getMessage());

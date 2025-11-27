@@ -40,6 +40,19 @@ public class RedeRepository {
             """;
         jdbcTemplate.update(sql, idMaquina, idComponente, download, upload, packetLoss, brasilia);
     }
+    
+    public Long salvarLeituraPacketLoss(Long idMaquina, Long idComponente, Double packetLoss) {
+        LocalDateTime brasilia = LocalDateTime.now(ZoneId.of("America/Sao_Paulo"));
+
+        String sql = """
+            INSERT INTO leitura (idComponente, idMaquina, dado, dthCaptura)
+            VALUES (?, ?, ?, ?)
+            """;
+
+        jdbcTemplate.update(sql, idComponente, idMaquina, packetLoss, brasilia);
+
+        return jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", Long.class);
+    }
 
     public List<RedeDTO> buscarDadosRede() {
         String sql = """

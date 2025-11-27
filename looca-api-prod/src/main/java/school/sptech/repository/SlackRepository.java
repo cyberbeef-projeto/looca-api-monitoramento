@@ -18,16 +18,17 @@ public class SlackRepository {
         jdbc.update(sql, idMaquina, tipo, mensagem);
     }
 
-    public void salvarAlerta(Long idMaquina,
+    public void salvarAlerta(Long idLeitura,
+                             Long idMaquina,
                              Long idComponente,
                              Long idParametro,
                              String descricao) {
 
         String sql = """
             INSERT INTO alerta (idLeitura, idComponente, idMaquina, idParametro, descricao)
-            VALUES (NULL, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?)
         """;
 
-        jdbc.update(sql, idComponente, idMaquina, idParametro, descricao);
+        jdbc.update(sql, idLeitura, idComponente, idMaquina, idParametro, descricao);
     }
 }

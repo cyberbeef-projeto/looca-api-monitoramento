@@ -58,8 +58,14 @@ public class RedeService {
                 packetLoss = Math.max(0.0, Math.min(packetLoss, 100.0));
             }
 
-            // salva no banco
+            // ✔️ salva rede
             repository.salvarDadosRede(idMaquina, idComponente, downloadMbps, uploadMbps, packetLoss);
+
+            // ✔️ salva leitura e captura o id
+            Long idLeitura = null;
+            if (packetLoss > 0) {
+                idLeitura = repository.salvarLeituraPacketLoss(idMaquina, idComponente, packetLoss);
+            }
 
             String tipoLog = null;
             if (packetLoss > 10) {
@@ -74,10 +80,12 @@ public class RedeService {
                         idMaquina, downloadMbps, uploadMbps, packetLoss
                 );
 
+                // ✔️ agora envia idLeitura ao SlackService
                 slackService.enviarMensagemSlack(
                         idMaquina,
                         idComponente,
-                        4L,  // idParametro
+                        4L,
+                        idLeitura,
                         tipoLog,
                         mensagemLog
                 );

@@ -61,25 +61,27 @@ public class RedeService {
             // salva no banco
             repository.salvarDadosRede(idMaquina, idComponente, downloadMbps, uploadMbps, packetLoss);
 
-            String tipoLog;
+            String tipoLog = null;
             if (packetLoss > 10) {
-                tipoLog = "CRITICO";
-            } else {
-                tipoLog = "ANORMAL";
+                tipoLog = "Crítico";
+            } else if (packetLoss >= 2.5) {
+                tipoLog = "Anormal";
             }
 
-            String mensagemLog = String.format(
-                    "ALERTA DE REDE | Máquina %d | Download: %.2f Mbps | Upload: %.2f Mbps | Packet Loss: %.2f%%",
-                    idMaquina, downloadMbps, uploadMbps, packetLoss
-            );
+            if (tipoLog != null) {
+                String mensagemLog = String.format(
+                        "ALERTA DE REDE | Máquina %d | Download: %.2f Mbps | Upload: %.2f Mbps | Packet Loss: %.2f%%",
+                        idMaquina, downloadMbps, uploadMbps, packetLoss
+                );
 
-            slackService.enviarMensagemSlack(
-                    idMaquina,
-                    idComponente,
-                    4L,  // idParametro
-                    tipoLog,
-                    mensagemLog
-            );
+                slackService.enviarMensagemSlack(
+                        idMaquina,
+                        idComponente,
+                        4L,  // idParametro
+                        tipoLog,
+                        mensagemLog
+                );
+            }
 
             mostrarPainel(downloadMbps, uploadMbps, packetLoss);
             mostrarLeituras();

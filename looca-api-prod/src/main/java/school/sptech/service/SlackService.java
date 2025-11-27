@@ -25,12 +25,13 @@ public class SlackService {
                                     String mensagemOriginal) {
 
         String descricaoFormatada = tipo + " - " + mensagemOriginal;
+        String desc = tipo;
 
         repository.salvarLogSlack(idMaquina, tipo, descricaoFormatada);
 
-        if (tipo.equalsIgnoreCase("ANORMAL") || tipo.equalsIgnoreCase("CRITICO")) {
+        if (tipo.equalsIgnoreCase("Anormal") || tipo.equalsIgnoreCase("Crítico")) {
 
-            repository.salvarAlerta(idMaquina, idComponente, idParametro, descricaoFormatada);
+            repository.salvarAlerta(idMaquina, idComponente, idParametro, desc);
 
             enviarParaSlack(descricaoFormatada);
         }
@@ -51,7 +52,7 @@ public class SlackService {
                 os.write(json.getBytes());
             }
 
-            System.out.println("Slack response: " + conn.getResponseCode());
+           // System.out.println("Slack response: " + conn.getResponseCode());
         }
         catch (Exception e) {
             System.err.println("Erro ao enviar mensagem ao Slack: " + e.getMessage());

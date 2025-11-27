@@ -61,17 +61,11 @@ public class RedeService {
             // salva no banco
             repository.salvarDadosRede(idMaquina, idComponente, downloadMbps, uploadMbps, packetLoss);
 
-            // Verifica gravidade
-            // Classificação correta
             String tipoLog;
             if (packetLoss > 10) {
                 tipoLog = "CRITICO";
-            }
-            else if (packetLoss >= 2.5) {
+            } else {
                 tipoLog = "ANORMAL";
-            }
-            else {
-                tipoLog = "NORMAL";
             }
 
             String mensagemLog = String.format(

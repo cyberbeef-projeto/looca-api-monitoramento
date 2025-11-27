@@ -10,7 +10,6 @@ public class SlackRepository {
         this.jdbc = jdbc;
     }
 
-    // Salvar log (sempre)
     public void salvarLogSlack(Long idMaquina, String tipo, String mensagem) {
         String sql = """
             INSERT INTO log (id_maquina, tipo, mensagem, criado_em)
@@ -19,7 +18,6 @@ public class SlackRepository {
         jdbc.update(sql, idMaquina, tipo, mensagem);
     }
 
-    // Salvar alerta (só anormal e crítico)
     public void salvarAlerta(Long idMaquina,
                              Long idComponente,
                              Long idParametro,

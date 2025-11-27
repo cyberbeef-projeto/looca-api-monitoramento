@@ -63,7 +63,7 @@ public class RedeService {
 
             String tipoLog = null;
             if (packetLoss > 10) {
-                tipoLog = "Crítico";
+                tipoLog = "Critico";
             } else if (packetLoss >= 2.5) {
                 tipoLog = "Anormal";
             }
